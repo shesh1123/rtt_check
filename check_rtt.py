@@ -7,6 +7,7 @@ from getpass import getpass
 from pathlib import Path
 
 username = 'cisco'
+# password = getpass()
 password = 'cisco'
 
 r1 = {"ip":"192.168.86.75","lo":"10.0.0.1"}
