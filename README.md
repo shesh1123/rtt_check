@@ -6,6 +6,6 @@ This  script pings all routers in a full mesh from each router and returns the o
 ## How-To
 
 - Clone the git repo
-- Edit the router hostname, management IP and loopback IP
+- Change the device details in devices.yml
 - Update the credentials
-- Run the file
+- Run the script
