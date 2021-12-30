@@ -1,6 +1,7 @@
 import csv
 import netmiko
 import textfsm
+import yaml
 
 
 from getpass import getpass
@@ -9,12 +10,6 @@ from pathlib import Path
 username = 'cisco'
 # password = getpass()
 password = 'cisco'
-
-r1 = {"ip":"192.168.86.75","lo":"10.0.0.1"}
-r2 = {"ip":"192.168.86.76","lo":"10.0.0.2"}
-r3 = {"ip":"192.168.86.77","lo":"10.0.0.3"}
-devices = [r1,r2,r3]
-
 
 netmiko_exceptions = (netmiko.ssh_exception.NetMikoTimeoutException,
                       netmiko.ssh_exception.NetMikoAuthenticationException)
@@ -35,23 +30,22 @@ def parse_putput(data, template_file):
         result = re_table.ParseText(data)
         return(header,result)
 
-
-def get_rtt():
+def get_rtt(devices):
 	ping_response=[]
-	header_row=['','R1','R2','R3']
+	header_row = list(devices.keys())
+	header_row.insert(0,'-')
 	ping_response.append(header_row)
-	for device in devices:
-		src_ip=device['lo']
+	for hostname,values in devices.items():
+		src_ip=values['loop0']
 		try:
-			connection = netmiko.ConnectHandler(device_type='cisco_ios', ip = device['ip'], username='cisco', password='cisco')
-			router = connection.base_prompt
+			connection = netmiko.ConnectHandler(device_type='cisco_ios', ip = values['mgmt_ip'], username=username, password=password)
 			tmp=[]
 			tmp.append(connection.base_prompt)
-			for ping_device in devices:
-				if ping_device == device:
+			for ping_hostname,ping_values in devices.items():
+				if ping_hostname == hostname:
 					tmp.append('-')
 					continue
-				output = connection.send_command(f'ping {ping_device["lo"]} source {src_ip}')
+				output = connection.send_command(f'ping {ping_values["loop0"]} source {src_ip}')
 				header,delay = parse_putput(output,template_file)
 				tmp.append(delay[0][0])
 			ping_response.append(tmp)
@@ -61,7 +55,10 @@ def get_rtt():
 	return (ping_response)
 
 def main():
-	list_delay = get_rtt()
+	
+	with open("devices.yml",'r') as f:
+		devices = yaml.safe_load(f)
+	list_delay = get_rtt(devices)
 	write_csv(list_delay,'delay')
 
 if __name__ == '__main__':
