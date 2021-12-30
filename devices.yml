@@ -1,0 +1,13 @@
+---
+  R1:
+    device_type : cisco_ios
+    mgmt_ip : 192.168.86.75
+    loop0 : 10.0.0.1
+  R2:
+    device_type : cisco_ios
+    mgmt_ip : 192.168.86.76
+    loop0 : 10.0.0.2
+  R3:
+    device_type : cisco_ios
+    mgmt_ip : 192.168.86.77
+    loop0 : 10.0.0.3    
